@@ -1,9 +1,8 @@
-// src/App.js
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-import PublicRoutes from './components/PublicRoute';
-import PrivateRoutes from './components/PrivateRoute';
+import PublicRoutes from './components/PublicRoutes';
+import PrivateRoutes from './components/PrivateRoutes';
 import Dashboard from './components/Dashboard';
 import Login from './components/Login';
 import SignUp from './components/SignUp';
@@ -26,7 +25,7 @@ const App = () => {
           {/* Private routes */}
           <Route element={<PrivateRoutes />}>
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/profile" element={<Profile/>} />
+            <Route path="/profile" element={<Profile />} />
           </Route>
         </Routes>
       </Router>

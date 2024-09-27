@@ -8,32 +8,33 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(() => {
         try {
             const storedUserData = localStorage.getItem('user');
-            console.log("Stored User Data:", storedUserData); // Debugging log
-
-            // Only parse if storedUserData is defined
-            return storedUserData ? JSON.parse(storedUserData) : null; 
+            console.log("Stored User Data in localStorage:", storedUserData); // Log for debugging
+            return storedUserData ? JSON.parse(storedUserData) : null;
         } catch (error) {
             console.error("Failed to parse user data from local storage:", error);
-            return null; // Return null if there was an error
+            return null;
         }
     });
+
+    // Declare the logout function before returning the context
+    const logout = () => {
+        setUser(null);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        console.log("User logged out"); // Log for debugging
+    };
 
     const login = async (identifier, password) => {
         try {
             const { user, token } = await authServices.login(identifier, password);
-            setUser(user); // Set user data in state
-            localStorage.setItem('token', token); // Store token in local storage
-            localStorage.setItem('user', JSON.stringify(user)); // Store user in local storage
+            setUser(user);
+            localStorage.setItem('token', token);
+            localStorage.setItem('user', JSON.stringify(user));
+            console.log("User logged in:", user); // Log for debugging
         } catch (error) {
             console.error("Login failed:", error);
-            throw error; // Rethrow the error for handling in the component
+            throw error;
         }
-    };
-
-    const logout = () => {
-        setUser(null);
-        localStorage.removeItem('token');
-        localStorage.removeItem('user'); // Remove user from local storage
     };
 
     return (
@@ -43,4 +44,5 @@ export const AuthProvider = ({ children }) => {
     );
 };
 
+// Hook to use the AuthContext
 export const useAuth = () => useContext(AuthContext);

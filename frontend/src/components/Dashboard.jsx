@@ -4,11 +4,10 @@ import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 
 const Dashboard = () => {
-    const { user, logout } = useAuth(); // Access logout function as well
+    const { user, logout } = useAuth(); // Access user and logout from context
 
-    // Fallback in case user or its fields are missing
-    const firstName = user?.coor_fname || "User"; // Fallback to "User" if coor_fname is missing
-    const lastName = user?.coor_lname || ""; // Fallback to empty string for last name
+    const firstName = user?.coordinator?.coor_fname || "User";
+    const lastName = user?.coordinator?.coor_lname || "";
 
     const handleLogout = () => {
         logout(); // Call logout when the button is clicked
@@ -17,10 +16,12 @@ const Dashboard = () => {
     return (
         <div>
             <h1>Dashboard</h1>
-            <p>Welcome, {firstName} {lastName}!</p> {/* Display user name */}
+            <p>Welcome, {firstName} {lastName}!</p>
             <button onClick={handleLogout}>Log Out</button>
 
-            <nav> <Link to='/profile'>Profile</Link></nav>
+            <nav>
+                <Link to='/profile'>Profile</Link>
+            </nav>
         </div>
     );
 };

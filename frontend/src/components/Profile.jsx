@@ -17,40 +17,30 @@ const Profile = () => {
     const [successMessage, setSuccessMessage] = useState('');
     const [loading, setLoading] = useState(false);
 
-    // Load the current user's data when the component mounts
     useEffect(() => {
-        // Check if the token is valid when the component mounts
         const token = localStorage.getItem('token');
-        if (token) {
-            try {
-                const decodedToken = JSON.parse(atob(token.split('.')[1])); // Decode the JWT token
-                const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
-                
-                console.log('Token Expiry Time:', decodedToken.exp);
-                console.log('Current Time:', currentTime);
-
-                // Check if the token has expired
-                if (decodedToken.exp < currentTime) {
-                    setErrorMessage('Session expired. Please log in again.');
-                    authServices.logout();  // Clear token and user data
-                    window.location.href = '/login';  // Redirect to login
-                    return;
-                }
-            } catch (error) {
-                console.error('Error decoding token:', error);
-                setErrorMessage('Invalid token. Please log in again.');
-                authServices.logout();
-                window.location.href = '/login';
-                return;
-            }
-        } else {
+        if (!token) {
             setErrorMessage('No token found. Please log in again.');
-            authServices.logout();
-            window.location.href = '/login';
             return;
         }
 
-        // Fetch current user data and set the form fields if the token is valid
+        try {
+            const decodedToken = JSON.parse(atob(token.split('.')[1]));
+            const currentTime = Math.floor(Date.now() / 1000);
+
+            console.log('Token Expiry Time:', decodedToken.exp);
+            console.log('Current Time:', currentTime);
+
+            if (decodedToken.exp < currentTime) {
+                setErrorMessage('Your session has expired. Please refresh the page or log in again.');
+                return; // No logout or redirection, just show the error
+            }
+        } catch (error) {
+            console.error('Error decoding token:', error);
+            setErrorMessage('Invalid token. Please log in again.');
+            return;
+        }
+
         const currentUser = authServices.getCurrentUser();
         if (currentUser && currentUser.coordinator) {
             setUser(currentUser.coordinator);
@@ -64,7 +54,7 @@ const Profile = () => {
                 coor_role: currentUser.coordinator.coor_role || ''
             });
         }
-    }, []); // Empty dependency array to ensure it only runs on mount
+    }, []);
 
     const handleChange = (e) => {
         setFormData({
@@ -77,53 +67,49 @@ const Profile = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true); 
-        setErrorMessage(''); 
-        setSuccessMessage(''); 
-    
-        // Token expiration check
+        setLoading(true);
+        setErrorMessage('');
+        setSuccessMessage('');
+
         const token = localStorage.getItem('token');
-
         if (!token) {
-        setErrorMessage('No token found. Please log in again.');
-        setLoading(false);
-        return;
-    }
+            setErrorMessage('No token found. Please log in again.');
+            setLoading(false);
+            return;
+        }
 
-    // Decode the token and check if it's expired
-    const decodedToken = JSON.parse(atob(token.split('.')[1]));
-    const currentTime = Math.floor(Date.now() / 1000);
-    if (decodedToken.exp < currentTime) {
-        setErrorMessage('Session expired. Please log in again.');
-        authServices.logout();
-        window.location.href = '/login';
-        setLoading(false);
-        return;
-    }
+        const decodedToken = JSON.parse(atob(token.split('.')[1]));
+        const currentTime = Math.floor(Date.now() / 1000);
+        if (decodedToken.exp < currentTime) {
+            setErrorMessage('Your session has expired. Please refresh the page or log in again.');
+            setLoading(false);
+            return; // No logout, just show the error
+        }
 
-    try {
-        authServices.setAuthToken(token); // Ensure that the token is included in all requests
-        const response = await axios.put(
-            `http://localhost:1337/api/coordinators/${user.id}`,
-            {
-                data: formData 
-            },
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`, // Include the token in the headers
+        try {
+            authServices.setAuthToken(token); // Ensure token is included in requests
+            const response = await axios.put(
+                `http://localhost:1337/api/coordinators/${user.id}`,
+                { data: formData },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`, // Include token in headers
+                    },
                 }
-            }
-        );
+            );
 
-        setUser(response.data); 
-        setSuccessMessage('Profile updated successfully!');
-    } catch (error) {
-        const errorMessage = error.response?.data?.message || error.message || "An error occurred. Please try again.";
-        setErrorMessage(errorMessage);
-    } finally {
-        setLoading(false); 
-    }
-};
+            setUser(response.data);
+            setSuccessMessage('Profile updated successfully!');
+        } catch (error) {
+            if (error.response && error.response.status === 401) {
+                setErrorMessage('Unauthorized access.');
+            } else {
+                setErrorMessage(error.message || 'An error occurred. Please try again.');
+            }
+        } finally {
+            setLoading(false); // Stop loading spinner or disable state
+        }
+    };
 
     return (
         <div>
