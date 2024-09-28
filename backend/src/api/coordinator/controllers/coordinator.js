@@ -82,12 +82,18 @@ module.exports = createCoreController('api::coordinator.coordinator', ({ strapi 
         return ctx.send({ coordinator: sanitizedCoordinator, token });
     },
 
+    async findOne(ctx) {
+        const {id} = ctx.params;
+        return ctx.send(id);
+    },
+
     // Update coordinator data
     async update(ctx) {
         const { id } = ctx.params;
         const { coor_fname, coor_lname, coor_username, coor_email, coor_contact, coor_address, coor_role } = ctx.request.body.data;
 
         const existingCoordinator = await strapi.entityService.findOne('api::coordinator.coordinator', id);
+        // console.log(existingCoordinator);
 
         if (!existingCoordinator) {
             return ctx.notFound('Coordinator not found');

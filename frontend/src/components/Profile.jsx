@@ -72,6 +72,8 @@ const Profile = () => {
         setSuccessMessage('');
 
         const token = localStorage.getItem('token');
+        // alert(token);
+
         if (!token) {
             setErrorMessage('No token found. Please log in again.');
             setLoading(false);
@@ -87,18 +89,23 @@ const Profile = () => {
         }
 
         try {
-            authServices.setAuthToken(token); // Ensure token is included in requests
-            const response = await axios.put(
-                `http://localhost:1337/api/coordinators/${user.id}`,
-                { data: formData },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`, // Include token in headers
-                    },
-                }
-            );
+            // authServices.setAuthToken(token); // Ensure token is included in requests
+            const response = await authServices.updateProfile(user.id, formData);
+            // const response = await axios.put(
+            //     `http://localhost:1337/api/coordinators/${user.id}`,
+            //     { data: formData },
+            //     {
+            //         headers: {
+            //             Authorization: `Bearer ${token}`, // Include token in headers
+            //         },
+            //     }
+            // );
 
-            setUser(response.data);
+            setUser(response);
+            const userdata = {
+                coordinator: response
+            };
+            localStorage.setItem('user', JSON.stringify(userdata));
             setSuccessMessage('Profile updated successfully!');
         } catch (error) {
             if (error.response && error.response.status === 401) {

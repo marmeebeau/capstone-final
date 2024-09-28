@@ -36,7 +36,7 @@ module.exports = {
       method: 'PUT',
       path: '/coordinators/:id',
       handler: 'coordinator.update',
-      auth: false, // Authentication required
+      auth: true, // Authentication required
     },
   ],
 };

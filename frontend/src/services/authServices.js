@@ -80,6 +80,7 @@ export const getProfile = async (userId) => {
 // Update the user profile
 export const updateProfile = async (userId, profileData) => {
   try {
+    setAuthToken(getCurrentUser().jwt);
     const response = await axios.put(`${API_URL}/coordinators/${userId}`, { data: profileData });
     return response.data;
   } catch (error) {
