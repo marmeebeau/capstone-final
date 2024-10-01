@@ -44,5 +44,11 @@ module.exports = {
       handler: 'coordinator.verifyOldPassword',
       auth: true, // Authentication required
     },
+    {
+      method: 'GET',
+      path: '/coordinators',
+      handler: 'coordinator.getAllCoordinators', 
+      auth: true, // Authentication required
+    },
   ],
 };

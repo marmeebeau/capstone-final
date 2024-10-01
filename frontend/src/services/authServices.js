@@ -102,6 +102,28 @@ export const updateProfile = async (userId, updatedData) => {
   }
 };
 
+// Fetch all users (admin-only access)
+export const getUsers = async () => {
+  try {
+    const token = getCurrentUser().jwt; // Fetch the current user's token
+    console.log('Current User Token:', token); // Log the token
+
+    if (!token) {
+      throw new Error('User is not authenticated');
+    }
+
+    const response = await axios.get(`${API_URL}/coordinators`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    
+    return response.data; // Return the fetched user data
+  } catch (error) {
+    console.error('Error fetching users:', error.response ? error.response.data : error.message);
+    throw new Error('Failed to fetch users.');
+  }
+};
+
+
 // Export all services
 const authServices = {
   signup,
@@ -113,6 +135,7 @@ const authServices = {
   updateProfile,
   setAuthToken,
   verifyOldPassword,
+  getUsers,
 };
 
 export default authServices;

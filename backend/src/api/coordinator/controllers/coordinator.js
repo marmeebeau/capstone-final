@@ -161,6 +161,21 @@ module.exports = createCoreController('api::coordinator.coordinator', ({ strapi 
         return ctx.send({ success: true });
     },
 
+    // Get all coordinators (for admin only)
+    async getAllCoordinators(ctx) {
+        // Optional: Check if user is admin
+        const userId = ctx.state.user.id; // Assuming the user ID is set in the context after authentication
+        const user = await strapi.entityService.findOne('api::coordinator.coordinator', userId);
+
+        if (!user || user.coor_role !== 'Admin') {
+            return ctx.unauthorized('You do not have permission to access this resource.');
+        }
+
+        // Fetch all coordinators from the database
+        const coordinators = await strapi.entityService.findMany('api::coordinator.coordinator');
+        return ctx.send(coordinators);
+    },
+
     // Logout (simply a placeholder)
     async logout(ctx) {
         ctx.send({ message: 'Logged out successfully' });

@@ -1,4 +1,3 @@
-// src/context/AuthContext.jsx
 import React, { createContext, useContext, useState } from 'react';
 import authServices from '../services/authServices';
 
@@ -8,15 +7,19 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(() => {
         try {
             const storedUserData = localStorage.getItem('user');
-            console.log("Stored User Data in localStorage:", storedUserData); // Log for debugging
-            return storedUserData ? JSON.parse(storedUserData) : null;
+            const parsedUser = storedUserData ? JSON.parse(storedUserData) : null;
+            console.log("Current User in AuthContext:", parsedUser); // Log for debugging
+            return parsedUser;
         } catch (error) {
             console.error("Failed to parse user data from local storage:", error);
             return null;
         }
     });
 
-    // Declare the logout function before returning the context
+    const isAdmin = () => {
+        return user && user.coordinator && user.coordinator.coor_role === 'Admin';
+    };
+
     const logout = () => {
         setUser(null);
         localStorage.removeItem('token');
@@ -38,7 +41,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout }}>
+        <AuthContext.Provider value={{ user, login, logout, isAdmin }}>
             {children}
         </AuthContext.Provider>
     );

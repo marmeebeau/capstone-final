@@ -8,6 +8,7 @@ import Login from './components/Login';
 import SignUp from './components/SignUp';
 import Home from './components/Home';
 import Profile from './components/Profile';
+import ManageUsers from './components/ManageUsers'; // New Admin-only component
 
 const App = () => {
   return (
@@ -22,10 +23,15 @@ const App = () => {
             <Route path="/" element={<Home />} />
           </Route>
 
-          {/* Private routes */}
+          {/* Private routes for authenticated users */}
           <Route element={<PrivateRoutes />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/profile" element={<Profile />} />
+          </Route>
+
+          {/* Admin-only route */}
+          <Route element={<PrivateRoutes requiredRole="Admin" />}>
+            <Route path="/manage-users" element={<ManageUsers />} />
           </Route>
         </Routes>
       </Router>
