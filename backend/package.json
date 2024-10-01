@@ -20,7 +20,6 @@
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-router-dom": "^6.0.0",
-    "strapi": "^3.6.11",
     "styled-components": "^6.0.0"
   },
   "engines": {
@@ -29,8 +28,5 @@
   },
   "strapi": {
     "uuid": "8da22631-b505-46af-b73e-c08716af2a31"
-  },
-  "devDependencies": {
-    "@strapi/typescript-utils": "^5.0.1"
   }
 }
