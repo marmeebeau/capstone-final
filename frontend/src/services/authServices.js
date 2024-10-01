@@ -35,7 +35,7 @@ export const login = async (identifier, password) => {
       const { coordinator, token } = response.data; // Ensure response contains 'coordinator' and 'token'
 
       localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify({ coordinator })); // Store 'coordinator' in user
+      localStorage.setItem('user', JSON.stringify({ ...coordinator, jwt: token })); // Include token in user object
 
       setAuthToken(token); // Set token for future requests
       return { coordinator, token }; // Return structured data
@@ -77,15 +77,28 @@ export const getProfile = async (userId) => {
   }
 };
 
-// Update the user profile
-export const updateProfile = async (userId, profileData) => {
+//Verifying ols password before updating
+export const verifyOldPassword = async (userId, oldPassword) => {
   try {
-    setAuthToken(getCurrentUser().jwt);
-    const response = await axios.put(`${API_URL}/coordinators/${userId}`, { data: profileData });
-    return response.data;
+      const response = await axios.post(`${API_URL}/coordinators/verify-password`, { userId, oldPassword });
+      return response.data; 
   } catch (error) {
-    console.error('Error updating profile:', error);
-    throw new Error(error.response?.data?.message || error.message || 'An error occurred. Please try again.');
+      console.error('Error verifying old password:', error);
+      throw new Error('Failed to verify password. Incorrect');
+  }
+};
+
+// Function to update the user profile
+export const updateProfile = async (userId, updatedData) => {
+  try {
+      const response = await axios.put(`${API_URL}/coordinators/${userId}`, {
+          data: updatedData, // Assuming the backend expects the data to be wrapped in a `data` object
+          headers: { Authorization: `Bearer ${getCurrentUser().jwt}` }, // Pass token in headers for authorization
+      });
+      return response.data; // Assuming response structure returns updated user data
+  } catch (error) {
+      console.error('Error updating profile:', error);
+      throw new Error('Failed to update profile.'); // Throw error for handling in Profile component
   }
 };
 
@@ -99,6 +112,7 @@ const authServices = {
   getProfile,
   updateProfile,
   setAuthToken,
+  verifyOldPassword,
 };
 
 export default authServices;

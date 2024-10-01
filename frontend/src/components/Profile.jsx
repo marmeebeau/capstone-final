@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import authServices from '../services/authServices';
-import axios from 'axios';
 
 const Profile = () => {
     const [user, setUser] = useState({});
@@ -11,7 +10,10 @@ const Profile = () => {
         coor_email: '',
         coor_contact: '',
         coor_address: '',
-        coor_role: ''
+        coor_role: '',
+        old_password: '',  
+        new_password: '',
+        confirm_password: ''
     });
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
@@ -24,16 +26,14 @@ const Profile = () => {
             return;
         }
 
+        // Decode token to check expiration
         try {
-            const decodedToken = JSON.parse(atob(token.split('.')[1]));
+            const decodedToken = JSON.parse(atob(token.split('.')[1])); // Decode token to check expiration
             const currentTime = Math.floor(Date.now() / 1000);
-
-            console.log('Token Expiry Time:', decodedToken.exp);
-            console.log('Current Time:', currentTime);
 
             if (decodedToken.exp < currentTime) {
                 setErrorMessage('Your session has expired. Please refresh the page or log in again.');
-                return; // No logout or redirection, just show the error
+                return;
             }
         } catch (error) {
             console.error('Error decoding token:', error);
@@ -41,7 +41,7 @@ const Profile = () => {
             return;
         }
 
-        const currentUser = authServices.getCurrentUser();
+        const currentUser = authServices.getCurrentUser(); // Fetch user data from local storage or state
         if (currentUser && currentUser.coordinator) {
             setUser(currentUser.coordinator);
             setFormData({
@@ -51,8 +51,13 @@ const Profile = () => {
                 coor_email: currentUser.coordinator.coor_email || '',
                 coor_contact: currentUser.coordinator.coor_contact || '',
                 coor_address: currentUser.coordinator.coor_address || '',
-                coor_role: currentUser.coordinator.coor_role || ''
+                coor_role: currentUser.coordinator.coor_role || '',
+                old_password: '', 
+                new_password: '',  
+                confirm_password: '' 
             });
+        } else {
+            setErrorMessage('User not found. Please log in again.');
         }
     }, []);
 
@@ -71,48 +76,44 @@ const Profile = () => {
         setErrorMessage('');
         setSuccessMessage('');
 
-        const token = localStorage.getItem('token');
-        // alert(token);
+        const { old_password, new_password, confirm_password } = formData;
 
+        // Validate password match
+        if (new_password && new_password !== confirm_password) {
+            setErrorMessage('Passwords do not match.');
+            setLoading(false);
+            return;
+        }
+
+        const token = localStorage.getItem('token');
         if (!token) {
             setErrorMessage('No token found. Please log in again.');
             setLoading(false);
             return;
         }
 
-        const decodedToken = JSON.parse(atob(token.split('.')[1]));
-        const currentTime = Math.floor(Date.now() / 1000);
-        if (decodedToken.exp < currentTime) {
-            setErrorMessage('Your session has expired. Please refresh the page or log in again.');
-            setLoading(false);
-            return; // No logout, just show the error
-        }
-
         try {
-            // authServices.setAuthToken(token); // Ensure token is included in requests
-            const response = await authServices.updateProfile(user.id, formData);
-            // const response = await axios.put(
-            //     `http://localhost:1337/api/coordinators/${user.id}`,
-            //     { data: formData },
-            //     {
-            //         headers: {
-            //             Authorization: `Bearer ${token}`, // Include token in headers
-            //         },
-            //     }
-            // );
+            // Verify the old password
+            const verifyResponse = await authServices.verifyOldPassword(user.id, old_password);
+            if (!verifyResponse.success) {
+                setErrorMessage('Old password is incorrect.');
+                setLoading(false);
+                return;
+            }
 
-            setUser(response);
-            const userdata = {
-                coordinator: response
-            };
-            localStorage.setItem('user', JSON.stringify(userdata));
+            // Prepare updated form data
+            const updatedFormData = { ...formData };
+            if (new_password) {
+                updatedFormData.coor_password = new_password; // Update to new password
+            }
+
+            // Update user profile with new data
+            const response = await authServices.updateProfile(user.id, updatedFormData);
+            setUser(response); // Update the user state with the response
+            localStorage.setItem('user', JSON.stringify({ coordinator: response })); // Store updated user data in local storage
             setSuccessMessage('Profile updated successfully!');
         } catch (error) {
-            if (error.response && error.response.status === 401) {
-                setErrorMessage('Unauthorized access.');
-            } else {
-                setErrorMessage(error.message || 'An error occurred. Please try again.');
-            }
+            setErrorMessage(error.message || 'An error occurred. Please try again.');
         } finally {
             setLoading(false); // Stop loading spinner or disable state
         }
@@ -147,6 +148,18 @@ const Profile = () => {
                 <div>
                     <label>Address:</label>
                     <textarea name="coor_address" value={formData.coor_address} onChange={handleChange} />
+                </div>
+                <div>
+                    <label>Old Password:</label>
+                    <input type="password" name="old_password" value={formData.old_password} onChange={handleChange} required />
+                </div>
+                <div>
+                    <label>New Password:</label>
+                    <input type="password" name="new_password" value={formData.new_password} onChange={handleChange} />
+                </div>
+                <div>
+                    <label>Confirm New Password:</label>
+                    <input type="password" name="confirm_password" value={formData.confirm_password} onChange={handleChange} />
                 </div>
                 {user.coor_role === 'Admin' && (
                     <div>
