@@ -37,6 +37,44 @@ export interface ApiCoordinatorCoordinator extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiEventPackageEventPackage
+  extends Struct.CollectionTypeSchema {
+  collectionName: 'event_packages';
+  info: {
+    singularName: 'event-package';
+    pluralName: 'event-packages';
+    displayName: 'event_package';
+    description: '';
+  };
+  options: {
+    draftAndPublish: true;
+  };
+  attributes: {
+    category: Schema.Attribute.Enumeration<
+      ['Wedding', 'Debut/Birthday', 'Social/Other']
+    >;
+    location: Schema.Attribute.String;
+    event_date: Schema.Attribute.Date;
+    event_time: Schema.Attribute.Time;
+    notes: Schema.Attribute.Text;
+    booking_status: Schema.Attribute.Enumeration<
+      ['Pending', 'Ongoing', 'Accepted', 'Cancelled', 'Declined']
+    >;
+    createdAt: Schema.Attribute.DateTime;
+    updatedAt: Schema.Attribute.DateTime;
+    publishedAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::event-package.event-package'
+    >;
+  };
+}
+
 export interface PluginUploadFile extends Struct.CollectionTypeSchema {
   collectionName: 'files';
   info: {
@@ -888,6 +926,7 @@ declare module '@strapi/strapi' {
   export module Public {
     export interface ContentTypeSchemas {
       'api::coordinator.coordinator': ApiCoordinatorCoordinator;
+      'api::event-package.event-package': ApiEventPackageEventPackage;
       'plugin::upload.file': PluginUploadFile;
       'plugin::upload.folder': PluginUploadFolder;
       'plugin::i18n.locale': PluginI18NLocale;

@@ -1,0 +1,46 @@
+{
+  "kind": "collectionType",
+  "collectionName": "event_packages",
+  "info": {
+    "singularName": "event-package",
+    "pluralName": "event-packages",
+    "displayName": "event_package",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "category": {
+      "type": "enumeration",
+      "enum": [
+        "Wedding",
+        "Debut/Birthday",
+        "Social/Other"
+      ]
+    },
+    "location": {
+      "type": "string"
+    },
+    "event_date": {
+      "type": "date"
+    },
+    "event_time": {
+      "type": "time"
+    },
+    "notes": {
+      "type": "text"
+    },
+    "booking_status": {
+      "type": "enumeration",
+      "enum": [
+        "Pending",
+        "Ongoing",
+        "Accepted",
+        "Cancelled",
+        "Declined"
+      ]
+    }
+  }
+}
