@@ -11,9 +11,10 @@
     "strapi": "strapi"
   },
   "dependencies": {
-    "@strapi/plugin-cloud": "5.0.1",
-    "@strapi/plugin-users-permissions": "5.0.1",
-    "@strapi/strapi": "5.0.1",
+    "@strapi/email": "^5.0.1",
+    "@strapi/plugin-cloud": "^5.0.1",
+    "@strapi/plugin-users-permissions": "^5.0.1",
+    "@strapi/strapi": "^5.0.1",
     "bcrypt": "^5.1.1",
     "jsonwebtoken": "^9.0.2",
     "mysql2": "3.9.4",

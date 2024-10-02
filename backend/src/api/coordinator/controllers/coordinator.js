@@ -90,15 +90,25 @@ module.exports = createCoreController('api::coordinator.coordinator', ({ strapi 
     // Update coordinator data
     async update(ctx) {
         const { id } = ctx.params;
-        const { coor_fname, coor_lname, coor_username, coor_email, coor_contact, coor_address, coor_role } = ctx.request.body.data;
-
+        const {
+            coor_fname,
+            coor_lname,
+            coor_username,
+            coor_email,
+            coor_contact,
+            coor_address,
+            coor_role,
+            currentPassword, // Added for password update
+            newPassword,     // Added for password update
+        } = ctx.request.body.data;
+    
         const existingCoordinator = await strapi.entityService.findOne('api::coordinator.coordinator', id);
-        // console.log(existingCoordinator);
-
+        
         if (!existingCoordinator) {
             return ctx.notFound('Coordinator not found');
         }
-
+    
+        // Prepare updated profile data
         const updatedData = {
             coor_fname,
             coor_lname,
@@ -108,11 +118,22 @@ module.exports = createCoreController('api::coordinator.coordinator', ({ strapi 
             coor_address,
             coor_role: existingCoordinator.coor_role === 'Admin' ? coor_role : existingCoordinator.coor_role,
         };
-
+    
+        // Update password if provided
+        if (currentPassword && newPassword) {
+            const validPassword = await strapi.services.auth.validatePassword(currentPassword, existingCoordinator.coor_password);
+            if (!validPassword) {
+                return ctx.badRequest('Current password is incorrect');
+            }
+    
+            updatedData.password = await strapi.services.auth.hashPassword(newPassword);
+        }
+    
         const updatedCoordinator = await strapi.entityService.update('api::coordinator.coordinator', id, { data: updatedData });
-
+    
         return ctx.send(updatedCoordinator);
     },
+    
 
     // Logout (simply a placeholder)
     async logout(ctx) {
