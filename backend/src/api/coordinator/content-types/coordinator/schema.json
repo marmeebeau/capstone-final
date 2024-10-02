@@ -1,0 +1,50 @@
+{
+  "kind": "collectionType",
+  "collectionName": "coordinators",
+  "info": {
+    "singularName": "coordinator",
+    "pluralName": "coordinators",
+    "displayName": "Coordinator",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "coor_fname": {
+      "type": "string",
+      "required": true
+    },
+    "coor_lname": {
+      "type": "string"
+    },
+    "coor_username": {
+      "type": "string",
+      "required": true
+    },
+    "coor_email": {
+      "type": "email",
+      "required": true
+    },
+    "coor_password": {
+      "type": "password",
+      "required": true
+    },
+    "coor_contact": {
+      "type": "string"
+    },
+    "coor_address": {
+      "type": "text"
+    },
+    "coor_role": {
+      "type": "enumeration",
+      "enum": [
+        "Admin",
+        "Coordinator"
+      ],
+      "required": true,
+      "default": "Coordinator"
+    }
+  }
+}
